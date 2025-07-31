@@ -1,4 +1,4 @@
-firmware_2025_07_17.bin & firmware_2025_07_25.bin
+firmware_2025_07_17.bin & firmware_2025_07_25.bin & firmware_2025_07_31.bin
 
 MicroPython Version :  MicroPython v1.25.0-dirty on 2025-07-17 (resp. 2025-07-25)
 ESP-IDF Version : 5.4.1
