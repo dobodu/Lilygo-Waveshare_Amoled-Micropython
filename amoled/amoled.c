@@ -40,7 +40,7 @@ License if public*/
 #include <math.h>
 #include <wchar.h>
 
-#define AMOLED_DRIVER_VERSION "26.07.2025"
+#define AMOLED_DRIVER_VERSION "31.07.2025"
 
 #if MICROPY_VERSION >= MICROPY_MAKE_VERSION(1, 23, 0) 
 #undef STATIC
@@ -73,24 +73,24 @@ const char* color_space_desc[] = {
 
 // Rotation Matrix { madctl, width, height, colstart, rowstart }
 STATIC const amoled_rotation_t ORIENTATIONS_RM690B0[4] = {
-    { RM690B0_MADCTL_RGB,										  450, 600, 16, 0},
-    { RM690B0_MADCTL_MX | RM690B0_MADCTL_MV | RM690B0_MADCTL_RGB, 600, 450, 0, 16},
-    { RM690B0_MADCTL_MX | RM690B0_MADCTL_MY | RM690B0_MADCTL_RGB, 450, 600, 16, 0},
-    { RM690B0_MADCTL_MV | RM690B0_MADCTL_MY | RM690B0_MADCTL_RGB, 600, 450, 0, 16}
+    { MADCTL_DEFAULT,				450, 600, 16, 0},
+    { MADCTL_DEFAULT | MADCTL_MX | MADCTL_MV,	600, 450, 0, 16}, // Column decrease + Row-Col exchange
+    { MADCTL_DEFAULT | MADCTL_MX | MADCTL_MY,	450, 600, 16, 0}, // Column decrease + Row decrease
+    { MADCTL_DEFAULT | MADCTL_MV | MADCTL_MY,	600, 450, 0, 16}  // Row decrease + Row-Col exchange
 };
 
 STATIC const amoled_rotation_t ORIENTATIONS_RM67162[4] = {
-    { RM67162_MADCTL_RGB,										  240, 536, 0, 0},
-    { RM67162_MADCTL_MX | RM67162_MADCTL_MV | RM67162_MADCTL_RGB, 536, 240, 0, 0},
-    { RM67162_MADCTL_MX | RM67162_MADCTL_MY | RM67162_MADCTL_RGB, 240, 536, 0, 0},
-    { RM67162_MADCTL_MV | RM67162_MADCTL_MY | RM67162_MADCTL_RGB, 536, 240, 0, 0}
+    { MADCTL_DEFAULT,				240, 536, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_MX | MADCTL_MV, 	536, 240, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_MX | MADCTL_MY, 	240, 536, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_MV | MADCTL_MY, 	536, 240, 0, 0}
 };
 
 STATIC const amoled_rotation_t ORIENTATIONS_SH8601[4] = {
-    { SH8601_MADCTL_RGB, 												368, 448, 0, 0},
-    { SH8601_MADCTL_X_FLIP | SH8601_MADCTL_RGB, 						368, 448, 0, 0},
-    { SH8601_MADCTL_Y_FLIP | SH8601_MADCTL_RGB, 						368, 448, 0, 0},
-    { SH8601_MADCTL_X_FLIP | SH8601_MADCTL_Y_FLIP | SH8601_MADCTL_RGB, 	368, 448, 0, 0}
+    { MADCTL_DEFAULT,					368, 448, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_RSMX, 			368, 448, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_RSMY, 			368, 448, 0, 0},
+    { MADCTL_DEFAULT | MADCTL_RSMX | MADCTL_RSMY, 	368, 448, 0, 0}
 };
 
 int mod(int x, int m) {
@@ -143,7 +143,7 @@ STATIC void frame_buffer_alloc(amoled_AMOLED_obj_t *self, int len) {
 }
 
 STATIC void set_rotation(amoled_AMOLED_obj_t *self, uint8_t rotation) {
-    self->madctl_val &= 0x1F;
+    self->madctl_val &= 0x1F; // keep ML, BGR, MH, RSMX and RSMY, but reset MY,MX, MV
     self->madctl_val |= self->rotations[rotation].madctl;
 
     write_spi(self, LCD_CMD_MADCTL, (uint8_t[]) { self->madctl_val }, 1);
@@ -236,11 +236,11 @@ mp_obj_t amoled_AMOLED_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 	// set RGB or BGR
     switch (self->color_space) {
         case COLOR_SPACE_RGB:
-            self->madctl_val = 0;
+            self->madctl_val &= ~MADCTL_BGR;
         break;
 
         case COLOR_SPACE_BGR:
-            self->madctl_val |= (1 << 3);
+            self->madctl_val |= MADCTL_BGR;
         break;
 
         default:
@@ -251,17 +251,17 @@ mp_obj_t amoled_AMOLED_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 	// set BPP
     switch (self->bpp) {
         case 16:
-            self->colmod_cal = 0x55;
+            self->colmod_cal = COLMOD_CAL_16;
             self->fb_bpp = 16;
         break;
 
         case 18:
-            self->colmod_cal = 0x66;
+            self->colmod_cal = COLMOD_CAL_18;
             self->fb_bpp = 18;
         break;
 
         case 24:
-            self->colmod_cal = 0x77;
+            self->colmod_cal = COLMOD_CAL_24;
             self->fb_bpp = 24;
         break;
 
