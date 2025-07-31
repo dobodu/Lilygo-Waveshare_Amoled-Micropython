@@ -81,29 +81,21 @@ extern "C" {
 #define LCD_FAC_SWIRE1		0x5A // SWIRE
 #define LCD_FAC_SWIRE2		0x5B // SWIRE
 
-//RM67162 MADCTRL and RGB
-#define RM67162_MADCTL_MY 0x80
-#define RM67162_MADCTL_MX 0x40
-#define RM67162_MADCTL_MV 0x20
-#define RM67162_MADCTL_ML 0x10
-#define RM67162_MADCTL_BGR 0x08
-#define RM67162_MADCTL_MH 0x04
-#define RM67162_MADCTL_RGB 0x00
+//SH8601, RM690B0 and RM67162 MADCTRL and RGB
+#define MADCTL_MY		0x80 // D7  = 1 Row address decreasing vertically
+#define MADCTL_MX		0x40 // D6 = 1 Column adress decreasing horizontal
+#define MADCTL_MV		0x20 // D5 = 1 Row - Column exchange
+#define MADCTL_ML		0x10 // D4 = 1 Vertical Refresh Order Bottom to Top
+#define MADCTL_BGR		0x08 // D3 = 1 for BGR (0 for RGB)
+#define MADCTL_MH		0x04 // D2 = RESERVED
+#define MADCTL_RSMX		0x02 // D1 = 1 Flip horizontally
+#define MADCTL_RSMY		0x01 // D0 = 1 Flip vertically
+#define MADCTL_DEFAULT	0x00
 
-//RM690B0 MADCTRL and RGB
-#define RM690B0_MADCTL_MY 0x80
-#define RM690B0_MADCTL_MX 0x40
-#define RM690B0_MADCTL_MV 0x20
-#define RM690B0_MADCTL_ML 0x10
-#define RM690B0_MADCTL_BGR 0x08
-#define RM690B0_MADCTL_MH 0x04
-#define RM690B0_MADCTL_RGB 0x00
-
-//SH8601 MADCTRL and RGB (SH8601 does not support rotations)
-#define SH8601_MADCTL_BGR 0x08
-#define SH8601_MADCTL_X_FLIP 0x02 // Flip Horizontal
-#define SH8601_MADCTL_Y_FLIP 0x05 // Flip Vertical
-#define SH8601_MADCTL_RGB 0x00
+// BPP Colmod 
+#define COLMOD_CAL_16   0x55
+#define COLMOD_CAL_18   0x66
+#define COLMOD_CAL_24   0x77
 
 // Color definitions
 
